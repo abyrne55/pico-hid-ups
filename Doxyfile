@@ -12,3 +12,9 @@ DISABLE_INDEX          = NO
 FULL_SIDEBAR           = NO
 RECURSIVE              = NO
 QUIET                  = YES
+HAVE_DOT               = NO
+EXCLUDE_SYMBOLS        = tud_*
+PREDEFINED             = "hid_report_type_t=uint8_t"
+ENABLE_PREPROCESSING   = YES
+MACRO_EXPANSION        = YES
+SKIP_FUNCTION_MACROS   = YES
