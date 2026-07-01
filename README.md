@@ -1,5 +1,7 @@
 # pico-hid-ups
 
+**[API Reference & Documentation](https://abyrne55.github.io/pico-hid-ups/)**
+
 USB HID Power Device (UPS) library for RP2040 using the Pico SDK and TinyUSB.
 
 Makes any RP2040 board appear as a USB UPS to operating systems like Linux (NUT),
