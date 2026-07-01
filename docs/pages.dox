@@ -1,0 +1,107 @@
+/**
+@page hardware Hardware Notes
+
+@section hw_interface USB Interface Layout
+
+The library always places HID at interface 0 and CDC at interfaces 1+2.
+This is critical for Synology NUT 0.41, which hardcodes `wIndex=0` when
+sending GET_REPORT requests.
+
+@subsection hw_endpoints Endpoint Allocation
+
+| Endpoint | Direction | Type      | Used by          |
+|----------|-----------|-----------|------------------|
+| EP1 IN   | IN        | Interrupt | HID reports      |
+| EP2 IN   | IN        | Interrupt | CDC notification |
+| EP3 OUT  | OUT       | Bulk      | CDC data out     |
+| EP3 IN   | IN        | Bulk      | CDC data in      |
+
+@subsection hw_serial CDC Serial
+
+CDC serial is always available on `/dev/ttyACM0` (Linux). Use
+`tud_cdc_write()` and `tud_cdc_write_flush()` for debug output. Do not
+use `pico_enable_stdio_usb` — it conflicts with the library's descriptor
+callbacks.
+
+@subsection hw_vid_pid VID/PID
+
+The library uses VID `0x2E8A` (Raspberry Pi) and PID `0x0005` (community
+range). Change the PID in `usb_descriptors.cpp` if needed.
+
+@subsection hw_gpio GPIO Wiring Patterns
+
+For the DRDN20-12 redundancy module:
+- Connect ALRM1/ALRM2 relay outputs to GPIOs with pull-down resistors
+- Feed 3V3 into the ALRM_in terminal
+- Normal operation (relays open): GPIO reads LOW
+- Supply failure (relay closes): GPIO reads HIGH
+
+
+@page nut_integration NUT Integration
+
+@section nut_conf ups.conf Configuration
+
+```
+[pico-ups]
+    driver = usbhid-ups
+    port = auto
+    vendorid = 2E8A
+    productid = 0005
+    pollinterval = 10
+```
+
+@section nut_variables NUT Variable Mapping
+
+| NUT Variable               | HID Report ID | Report Name            |
+|---------------------------|---------------|------------------------|
+| battery.charge            | 12            | RemainingCapacity      |
+| battery.runtime           | 13            | RunTimeToEmpty         |
+| battery.voltage           | 11            | Voltage                |
+| battery.current           | 21            | Current                |
+| ups.status (OL/OB/etc)    | 7             | PresentStatus          |
+| ups.delay.shutdown        | 18            | DelayBeforeShutdown    |
+| ups.delay.reboot          | 19            | DelayBeforeReboot      |
+| battery.charge.low        | 17            | RemainingCapacityLimit |
+| battery.charge.warning    | 15            | WarningCapacityLimit   |
+| battery.mfr.date          | 9             | ManufactureDate        |
+| input.voltage.nominal     | 10            | ConfigVoltage          |
+
+@section nut_synology Synology DSM
+
+Synology DSM uses NUT 0.41 internally. It sends GET_REPORT with `wIndex=0`,
+which only works if HID is at interface 0. This library guarantees that.
+
+For Synology, configure via Control Panel > Hardware & Power > UPS, or
+manually edit `/etc/ups/ups.conf` via SSH.
+
+@section nut_shutdown Shutdown Command Flow
+
+1. NUT writes DelayBeforeShutdown (report 18) with a positive value
+2. The library updates `delay_before_shutdown()` and invokes `on_set_report`
+3. The application can set `shutdown_imminent` in PresentStatus
+4. NUT sees `ShutdownImminent` on the next poll and initiates OS shutdown
+
+
+@page compatibility Compatibility
+
+@section compat_linux Linux (NUT)
+
+Fully compatible with `usbhid-ups` driver. Use `usbhid-ups -x explore`
+to verify all 27 HID objects are detected with correct values.
+
+@section compat_macos macOS
+
+macOS natively recognizes USB HID UPS devices. Check System Information >
+Hardware > Power > UPS to verify the device appears with correct reports.
+
+@section compat_synology Synology DSM
+
+Compatible with Synology's built-in NUT client. The interface-0 guarantee
+is specifically designed for Synology's `wIndex=0` behavior.
+
+@section compat_windows Windows
+
+Windows recognizes USB HID UPS devices via the built-in HID UPS battery
+driver. The device appears in Device Manager under "Batteries" and powers
+the battery status indicator.
+*/

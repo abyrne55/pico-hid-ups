@@ -1,0 +1,14 @@
+PROJECT_NAME           = "pico-hid-ups"
+PROJECT_BRIEF          = "USB HID Power Device (UPS) library for RP2040"
+INPUT                  = README.md include/pico_hid_ups.h docs/pages.dox
+OUTPUT_DIRECTORY       = build/docs
+GENERATE_HTML          = YES
+GENERATE_LATEX         = NO
+EXTRACT_ALL            = YES
+USE_MDFILE_AS_MAINPAGE = README.md
+HTML_EXTRA_STYLESHEET  =
+GENERATE_TREEVIEW      = YES
+DISABLE_INDEX          = NO
+FULL_SIDEBAR           = NO
+RECURSIVE              = NO
+QUIET                  = YES
