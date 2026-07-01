@@ -10,7 +10,7 @@ status, and CDC serial for debug output.
 
 ## Features
 
-- **HID always interface 0** — required by Synology NUT 0.41 (`wIndex=0`)
+- **HID always interface 0** — required by some versions of NUT, e.g., those used in older Synology NAS devices (`wIndex=0`)
 - **GET_REPORT returns real values** — `tud_hid_get_report_cb` handles all 27 report IDs
 - **Type-safe API** — named setters instead of raw `sendReport()`
 - **Host command callbacks** — register a function for `DelayBeforeShutdown` writes

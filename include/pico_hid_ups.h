@@ -6,7 +6,7 @@
  * @brief USB HID Power Device (UPS) library for RP2040.
  *
  * Single-header public API. Implements a USB HID UPS using TinyUSB on the
- * Pico SDK. HID is always interface 0 (required by Synology NUT 0.41).
+ * Pico SDK. HID is always interface 0 (required by some versions of NUT, e.g., those used in older Synology NAS devices).
  * CDC serial is always available on interfaces 1+2.
  *
  * @note The consuming application must NOT use pico_enable_stdio_usb.

@@ -4,7 +4,8 @@
 @section hw_interface USB Interface Layout
 
 The library always places HID at interface 0 and CDC at interfaces 1+2.
-This is critical for Synology NUT 0.41, which hardcodes `wIndex=0` when
+This is critical for some versions of NUT (e.g., those used in older
+Synology NAS devices), which hardcode `wIndex=0` when
 sending GET_REPORT requests.
 
 @subsection hw_endpoints Endpoint Allocation
