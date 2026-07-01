@@ -74,7 +74,7 @@ Flash the resulting `.uf2` file to your RP2040 board.
 The CDC serial interface is always available at `/dev/ttyACM0`. Connect with:
 
 ```bash
-picocom /dev/ttyACM0 --noreset
+picocom --imap lfcrlf --noreset /dev/ttyACM0
 ```
 
 The `--noreset` flag is required — without it, picocom toggles DTR on open
