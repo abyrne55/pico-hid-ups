@@ -169,6 +169,10 @@ int16_t PicoHidUps::delay_before_reboot() const {
     return delay_before_reboot_;
 }
 
+AlarmControl PicoHidUps::audible_alarm_control() const {
+    return audible_alarm_control_;
+}
+
 void PicoHidUps::on_set_report(set_report_cb_t cb) {
     set_report_cb_ = cb;
 }

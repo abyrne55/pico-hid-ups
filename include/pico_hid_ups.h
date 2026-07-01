@@ -354,6 +354,14 @@ public:
     int16_t delay_before_reboot() const;
 
     /**
+     * @brief Current audible alarm control setting.
+     * @return AlarmControl::Disabled (1), Enabled (2), or Muted (3).
+     *
+     * Reads the value of HID report 20 (AudibleAlarmControl).
+     */
+    AlarmControl audible_alarm_control() const;
+
+    /**
      * @brief Register a callback for host SET_REPORT commands.
      *
      * Called from within tud_task() context whenever the host writes to a
