@@ -19,7 +19,7 @@ sending GET_REPORT requests.
 
 @subsection hw_serial CDC Serial
 
-CDC serial is always available on `/dev/ttyACM0` (Linux). Use
+CDC serial is typically available at `/dev/ttyACM0` (Linux). Use
 `tud_cdc_write()` and `tud_cdc_write_flush()` for debug output. Do not
 use `pico_enable_stdio_usb` — it conflicts with the library's descriptor
 callbacks.
@@ -29,9 +29,10 @@ callbacks.
 The library uses VID `0x2E8A` (Raspberry Pi) and PID `0x0005` (community
 range). Change the PID in `usb_descriptors.cpp` if needed.
 
-@subsection hw_gpio GPIO Wiring Patterns
+@subsection hw_gpio GPIO Wiring Example
 
-For the DRDN20-12 redundancy module:
+Example wiring for a Mean Well DRDN20-12 DC redundancy module (or similar
+relay-output alarm source):
 - Connect ALRM1/ALRM2 relay outputs to GPIOs with pull-down resistors
 - Feed 3V3 into the ALRM_in terminal
 - Normal operation (relays open): GPIO reads LOW
@@ -53,34 +54,54 @@ For the DRDN20-12 redundancy module:
 
 @section nut_variables NUT Variable Mapping
 
-| NUT Variable               | HID Report ID | Report Name            |
-|---------------------------|---------------|------------------------|
-| battery.charge            | 12            | RemainingCapacity      |
-| battery.runtime           | 13            | RunTimeToEmpty         |
-| battery.voltage           | 11            | Voltage                |
-| battery.current           | 21            | Current                |
-| ups.status (OL/OB/etc)    | 7             | PresentStatus          |
-| ups.delay.shutdown        | 18            | DelayBeforeShutdown    |
-| ups.delay.reboot          | 19            | DelayBeforeReboot      |
-| battery.charge.low        | 17            | RemainingCapacityLimit |
-| battery.charge.warning    | 15            | WarningCapacityLimit   |
-| battery.mfr.date          | 9             | ManufactureDate        |
-| input.voltage.nominal     | 10            | ConfigVoltage          |
+| NUT Variable               | HID Report ID | Report Name             |
+|---------------------------|---------------|-------------------------|
+| ups.status (OL/OB/etc)    | 7             | PresentStatus           |
+| ups.delay.shutdown        | 18            | DelayBeforeShutdown     |
+| ups.delay.reboot          | 19            | DelayBeforeReboot       |
+| ups.beeper.status         | 20            | AudibleAlarmControl     |
+| battery.charge            | 12            | RemainingCapacity       |
+| battery.charge.low        | 17            | RemainingCapacityLimit  |
+| battery.charge.warning    | 15            | WarningCapacityLimit    |
+| battery.runtime           | 13            | RunTimeToEmpty          |
+| battery.runtime.low       | 8             | RemainingTimeLimit      |
+| battery.voltage           | 11            | Voltage                 |
+| battery.voltage.nominal   | 10            | ConfigVoltage           |
+| battery.current           | 21            | Current                 |
+| battery.mfr.date          | 9             | ManufactureDate         |
+| battery.type              | 31            | iDeviceChemistry        |
+
+Reports 1–3 (string indices), 6 (Rechargeable), 14 (FullChargeCapacity),
+16 (CapacityGranularity1), 22–24, 26–28, and 32 are also exposed via
+GET_REPORT. Exact NUT variable names for these depend on the subdriver.
 
 @section nut_synology Synology DSM
 
-Synology DSM uses NUT 0.41 internally. It sends GET_REPORT with `wIndex=0`,
-which only works if HID is at interface 0. This library guarantees that.
+Synology DSM uses an older build of NUT internally. It sends GET_REPORT
+with `wIndex=0`, which only works if HID is at interface 0. This library
+guarantees that.
 
 For Synology, configure via Control Panel > Hardware & Power > UPS, or
 manually edit `/etc/ups/ups.conf` via SSH.
 
 @section nut_shutdown Shutdown Command Flow
 
-1. NUT writes DelayBeforeShutdown (report 18) with a positive value
+1. NUT writes DelayBeforeShutdown (report 18) with a non-negative value (0 = immediate)
 2. The library updates `delay_before_shutdown()` and invokes `on_set_report`
 3. The application can set `shutdown_imminent` in PresentStatus
 4. NUT sees `ShutdownImminent` on the next poll and initiates OS shutdown
+
+Example callback:
+@code
+void on_host_command(uint8_t report_id) {
+    if (report_id == 18 && hid_ups.delay_before_shutdown() >= 0) {
+        hid_ups.status.shutdown_imminent = 1;
+    }
+}
+
+// In main(), before tusb_init():
+hid_ups.on_set_report(on_host_command);
+@endcode
 
 
 @page compatibility Compatibility

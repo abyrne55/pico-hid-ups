@@ -13,7 +13,7 @@ status, and CDC serial for debug output.
 - **HID always interface 0** — required by some versions of NUT, e.g., those used in older Synology NAS devices (`wIndex=0`)
 - **GET_REPORT returns real values** — `tud_hid_get_report_cb` handles all 27 report IDs
 - **Type-safe API** — named setters instead of raw `sendReport()`
-- **Host command callbacks** — register a function for `DelayBeforeShutdown` writes
+- **Host command callbacks** — register a function for host SET_REPORT writes (shutdown, reboot, alarm, thresholds)
 - **CDC serial always available** — HID at interface 0, CDC at interfaces 1+2
 - **Spec-correct flags** — RemainingTimeLimit and AudibleAlarmControl are FEATURE-only
 
@@ -61,7 +61,11 @@ pico_enable_stdio_usb(my_app 0)
 
 ## Build
 
+This is a library — it cannot be built standalone. Build the consuming
+project that links against `pico_hid_ups`:
+
 ```bash
+cd your-project
 mkdir build && cd build
 cmake ..
 make -j$(nproc)
@@ -71,7 +75,7 @@ Flash the resulting `.uf2` file to your RP2040 board.
 
 ## CDC serial
 
-The CDC serial interface is always available at `/dev/ttyACM0`. Connect with:
+The CDC serial interface is typically available at `/dev/ttyACM0` (Linux). Connect with:
 
 ```bash
 picocom --imap lfcrlf --noreset /dev/ttyACM0
@@ -86,7 +90,7 @@ The Pico SDK's `pico_enable_stdio_usb` provides its own `tusb_config.h` and USB
 descriptor callbacks. Since this library must own the descriptor layout (HID at
 interface 0), enabling `stdio_usb` would cause link-time conflicts. Use
 `tud_cdc_write()` / `tud_cdc_write_flush()` directly for debug output — the CDC
-interface is always available at `/dev/ttyACM0`.
+interface is available at `/dev/ttyACM0` (Linux).
 
 ## License
 

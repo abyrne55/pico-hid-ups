@@ -355,7 +355,7 @@ static uint8_t const desc_configuration[] = {
     TUD_CONFIG_DESCRIPTOR(1, ITF_NUM_TOTAL, 0, CONFIG_TOTAL_LEN, 0, 100),
     TUD_HID_DESCRIPTOR(ITF_NUM_HID, 0, HID_ITF_PROTOCOL_NONE,
                         sizeof(desc_hid_report), 0x81, 16, 10),
-    TUD_CDC_DESCRIPTOR(ITF_NUM_CDC, STRID_DEVICECHEMISTRY, 0x82, 8, 0x03, 0x83, 64),
+    TUD_CDC_DESCRIPTOR(ITF_NUM_CDC, 0, 0x82, 8, 0x03, 0x83, 64),
 };
 
 // --- String descriptors ---

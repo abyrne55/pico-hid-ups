@@ -111,9 +111,11 @@ constexpr uint16_t encode_manufacture_date(uint16_t year, uint8_t month, uint8_t
  * Typical usage:
  * @code
  * #include "pico_hid_ups.h"
+ * #include "bsp/board_api.h"
  * #include "tusb.h"
  *
  * int main() {
+ *     board_init();
  *     hid_ups.begin();
  *     tusb_init();
  *     while (true) {
@@ -173,7 +175,7 @@ public:
 
     /**
      * @brief Estimated time until battery is empty.
-     * @param seconds Time in seconds (0–65534).
+     * @param seconds Time in seconds.
      *
      * Maps to HID report 13 (RunTimeToEmpty), Battery System page (0x85),
      * usage 0x68. Unit: seconds. Sent as INPUT and FEATURE.
@@ -185,13 +187,13 @@ public:
      * @param centivolts Voltage in units of 10mV (e.g. 1200 = 12.00V).
      *
      * Maps to HID report 11 (Voltage), Power Device page (0x84),
-     * usage 0x30. Unit: centivolts (10^5 V). Sent as INPUT and FEATURE.
+     * usage 0x30. Unit: centivolts. Sent as INPUT and FEATURE.
      */
     void set_voltage(uint16_t centivolts);
 
     /**
      * @brief Average time until battery is empty.
-     * @param seconds Time in seconds (0–65534).
+     * @param seconds Time in seconds.
      *
      * Maps to HID report 28 (AverageTimeToEmpty), Battery System page (0x85),
      * usage 0x69. Unit: seconds. Sent as INPUT and FEATURE.
@@ -200,7 +202,7 @@ public:
 
     /**
      * @brief Average time until battery is fully charged.
-     * @param seconds Time in seconds (0–65534).
+     * @param seconds Time in seconds.
      *
      * Maps to HID report 26 (AverageTimeToFull), Battery System page (0x85),
      * usage 0x6A. Unit: seconds. FEATURE-only.
@@ -230,13 +232,14 @@ public:
      * @param centivolts Voltage in units of 10mV.
      *
      * Maps to HID report 10 (ConfigVoltage), Power Device page (0x84),
-     * usage 0x40. Unit: centivolts. FEATURE-only, read-only.
+     * usage 0x40. Unit: centivolts. FEATURE-only (not writable by host).
      */
     void set_config_voltage(uint16_t centivolts);
 
     /**
      * @brief Minimum remaining time before low-battery warning.
-     * @param seconds Time in seconds (120–1380).
+     * @param seconds Time in seconds. The HID descriptor declares a valid
+     *        range of 120–1380, but the setter does not clamp.
      *
      * Maps to HID report 8 (RemainingTimeLimit), Battery System page (0x85),
      * usage 0x2A. Unit: seconds. FEATURE-only, writable by host.
